@@ -27,9 +27,18 @@
     <p class="text-gray-500">No user details available for this patient.</p>
     {% endif %}
 
-    <!-- Medical Records as Cards -->
+    <!-- Medical Records Section -->
     <div class="mb-6">
         <h2 class="text-2xl font-semibold mb-4">Medical Records</h2>
+        
+        <!-- Add Medical Record Button (Only for Doctors) -->
+        {% if 'Doctor' in request.session.user_roles %}
+            <a href="{% url 'create_medical_record' patient.id %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4 inline-block">
+                Add Medical Record
+            </a>
+        {% endif %}
+
+        <!-- Medical Records as Cards -->
         {% if medical_records %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for record in medical_records %}
@@ -87,4 +96,11 @@
             <p class="text-gray-500">No health notifications found.</p>
         {% endif %}
     </div>
+
+    <!-- Back Button (Only for Doctors) -->
+    {% if 'Doctor' in request.session.user_roles %}
+        <a href="{% url 'view_patients' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+            Back to Patients
+        </a>
+    {% endif %}
 {% endblock %}

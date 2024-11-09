@@ -26,6 +26,7 @@ patients_container = database.get_container_client(PATIENTS_CONTAINER_NAME)
 medical_records_container = database.get_container_client(MEDICAL_RECORDS_CONTAINER_NAME)
 users_container = database.get_container_client(USERS_CONTAINER_NAME)
 health_notifications_container = database.get_container_client(HEALTH_NOTIFICATIONS_CONTAINER_NAME)
+session_container = database.get_container_client("sessions")
 
 def get_patients_page(page_size=10, page=1):
     logger.info(f"Fetching page {page} of patients, page size: {page_size}")
@@ -133,3 +134,54 @@ def create_user_and_patient(name, email, password, date_of_birth, sex, ever_marr
     except exceptions.CosmosHttpResponseError as e:
         logger.error(f"Failed to create patient: {e}")
         return False
+    
+def verify_user(email, password):
+    """Verify user credentials by matching email and bcrypt-hashed password."""
+    try:
+        query = "SELECT * FROM c WHERE c.email = @email"
+        params = [{"name": "@email", "value": email}]
+        
+        results = list(users_container.query_items(
+            query=query,
+            parameters=params,
+            enable_cross_partition_query=True
+        ))
+        
+        if results:
+            user = results[0]
+            if pwd_context.verify(password, user['password_hash']):
+                return user
+        return None
+    except exceptions.CosmosHttpResponseError as e:
+        logger.error(f"Error verifying user: {e}")
+        return None
+
+def get_session_data(session_id):
+    try:
+        session = session_container.read_item(item=session_id, partition_key=session_id)
+        return session.get("data", {})
+    except exceptions.CosmosResourceNotFoundError:
+        return {}
+
+def save_session_data(session_id, data):
+    session_item = {
+        "id": session_id,
+        "data": data
+    }
+    session_container.upsert_item(session_item)
+
+def get_patient_id_by_user_id(user_id):
+    """
+    Fetch the patient ID associated with the given user ID.
+    """
+    try:
+        query = "SELECT * FROM c WHERE c.user_id = @user_id"
+        parameters = [{"name": "@user_id", "value": user_id}]
+        results = list(patients_container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+
+        if results:
+            return results[0]['id']
+    except Exception as e:
+        logger.error(f"Error retrieving patient ID for user ID {user_id}: {e}")
+    
+    return None

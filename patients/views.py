@@ -2,12 +2,15 @@ from django.urls import reverse
 import datetime
 import logging
 from django.shortcuts import redirect, render
+from patients.decorators import login_required, role_required
 from services.blockchain import create_medical_record
-from services.cosmosdb_helper import create_user_and_patient, get_patient_details, get_patients_page 
+from services.cosmosdb_helper import create_user_and_patient, get_patient_details, get_patient_id_by_user_id, get_patients_page, verify_user 
+from django.contrib import messages
 
-# Set up a logger for this module
 logger = logging.getLogger(__name__)
 
+@login_required
+@role_required(['Doctor'])
 def view_patients(request):
     page_size = 10
     page = int(request.GET.get('page', 1))
@@ -30,6 +33,8 @@ def view_patients(request):
     logger.info(f"Rendering view_patients.html with {len(patients)} patients for page {page}")
     return render(request, 'patients/view_patients.html', context)
 
+@login_required
+@role_required(['Patient', 'Doctor'])
 def patient_user_details(request, patient_id):
     logger.info(f"Fetching details for patient with ID: {patient_id}")
     
@@ -65,6 +70,8 @@ def patient_user_details(request, patient_id):
     logger.info(f"Rendering patient_user_details.html for patient ID: {patient_id}")
     return render(request, 'patients/patient_user_details.html', context)
 
+@login_required
+@role_required(['Doctor'])
 def create_medical_record_view(request, patient_id):
     if request.method == "POST":
         record_type = request.POST.get("record_type")
@@ -104,7 +111,8 @@ def create_medical_record_view(request, patient_id):
 
     return render(request, 'patients/create_medical_record.html', {'patient_id': patient_id})
 
-
+@login_required
+@role_required(['Doctor'])
 def add_patient_view(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -120,3 +128,33 @@ def add_patient_view(request):
             return render(request, 'patients/add_patient.html', {'error_message': "Failed to add patient. Please try again."})
 
     return render(request, 'patients/add_patient.html')
+
+def login_view(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        user = verify_user(email, password)
+        
+        if user:
+            request.session['user_id'] = user['id']
+            request.session['user_name'] = user['name']  
+            request.session['user_roles'] = user['roles']  
+            if "Patient" in user['roles']:
+                patient_id = get_patient_id_by_user_id(user['id'])
+                if patient_id:
+                    return redirect('patient_user_details', patient_id=patient_id)
+                
+            return redirect('view_patients')
+        else:
+            messages.error(request, "Invalid email or password.")
+            return render(request, 'patients/login.html')
+
+    return render(request, 'patients/login.html')
+
+def logout_view(request):
+    request.session.clear()  
+    return redirect('login')
+
+def access_denied_view(request):
+    return render(request, 'patients/access_denied.html')
