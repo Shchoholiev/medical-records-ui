@@ -1,12 +1,14 @@
-import datetime
 import os
 import logging
 import uuid
 from azure.cosmos import CosmosClient, exceptions
+from passlib.context import CryptContext
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Configuration
 CONNECTION_STRING = os.getenv("COSMOS_CONNECTION_STRING")
@@ -93,3 +95,39 @@ def get_patient_details(patient_id):
     except exceptions.CosmosHttpResponseError as e:
         logger.error(f"Error querying Cosmos DB for patient ID {patient_id}: {e}")
         return None, None, None, None
+    
+def create_user_and_patient(name, email, password, date_of_birth, sex, ever_married):
+    user_id = str(uuid.uuid4())
+    password_hash = pwd_context.hash(password) 
+    
+    user = {
+        "id": user_id,
+        "name": name,
+        "email": email,
+        "password_hash": password_hash  
+    }
+    
+    try:
+        users_container.create_item(body=user)
+        logger.info(f"User created with ID: {user_id}")
+    except exceptions.CosmosHttpResponseError as e:
+        logger.error(f"Failed to create user: {e}")
+        return False
+
+    patient_id = str(uuid.uuid4())
+    patient = {
+        "id": patient_id,
+        "name": name,
+        "date_of_birth": date_of_birth,
+        "sex": sex,
+        "ever_married": bool(ever_married),
+        "user_id": user_id  
+    }
+    
+    try:
+        patients_container.create_item(body=patient)
+        logger.info(f"Patient created with ID: {patient_id}, linked to user ID: {user_id}")
+        return True
+    except exceptions.CosmosHttpResponseError as e:
+        logger.error(f"Failed to create patient: {e}")
+        return False

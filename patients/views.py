@@ -3,7 +3,7 @@ import datetime
 import logging
 from django.shortcuts import redirect, render
 from services.blockchain import create_medical_record
-from services.cosmosdb_helper import get_patient_details, get_patients_page 
+from services.cosmosdb_helper import create_user_and_patient, get_patient_details, get_patients_page 
 
 # Set up a logger for this module
 logger = logging.getLogger(__name__)
@@ -103,3 +103,20 @@ def create_medical_record_view(request, patient_id):
             })
 
     return render(request, 'patients/create_medical_record.html', {'patient_id': patient_id})
+
+
+def add_patient_view(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        date_of_birth = request.POST.get("date_of_birth")
+        sex = request.POST.get("sex")
+        ever_married = request.POST.get("ever_married") == "on"  # Checkbox
+
+        if create_user_and_patient(name, email, password, date_of_birth, sex, ever_married):
+            return redirect('view_patients')  
+        else:
+            return render(request, 'patients/add_patient.html', {'error_message': "Failed to add patient. Please try again."})
+
+    return render(request, 'patients/add_patient.html')
