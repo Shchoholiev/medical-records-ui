@@ -1,3 +1,4 @@
+import datetime
 import os
 import logging
 import uuid
@@ -23,48 +24,6 @@ patients_container = database.get_container_client(PATIENTS_CONTAINER_NAME)
 medical_records_container = database.get_container_client(MEDICAL_RECORDS_CONTAINER_NAME)
 users_container = database.get_container_client(USERS_CONTAINER_NAME)
 health_notifications_container = database.get_container_client(HEALTH_NOTIFICATIONS_CONTAINER_NAME)
-
-def get_patient_data(patient_id):
-    logger.info(f"Fetching patient data for patient ID: {patient_id}")
-    try:
-        patient = patients_container.read_item(item=patient_id, partition_key=patient_id)
-        logger.info(f"Patient data retrieved for patient ID: {patient_id}")
-        return patient
-    except exceptions.CosmosResourceNotFoundError:
-        logger.error(f"Patient with ID {patient_id} not found.")
-        return None
-
-def get_medical_records_by_patient_id(patient_id):
-    logger.info(f"Fetching medical records for patient ID: {patient_id}")
-    try:
-        query = "SELECT * FROM c WHERE c.patient_id = @patient_id"
-        parameters = [{"name": "@patient_id", "value": patient_id}]
-        
-        results = medical_records_container.query_items(
-            query=query,
-            parameters=parameters,
-            enable_cross_partition_query=True
-        )
-        
-        records = list(results)
-        logger.info(f"Found {len(records)} medical records for patient ID: {patient_id}")
-        return records
-    except exceptions.CosmosHttpResponseError as e:
-        logger.error(f"Error querying medical records for patient ID {patient_id}: {e}")
-        return []
-
-def get_user_by_user_id(user_id):
-    logger.info(f"Fetching user data for user ID: {user_id}")
-    try:
-        user = users_container.read_item(item=user_id, partition_key=user_id)
-        logger.info(f"User data retrieved for user ID: {user_id}")
-        return user
-    except exceptions.CosmosResourceNotFoundError:
-        logger.error(f"User with ID {user_id} not found.")
-        return None
-    except exceptions.CosmosHttpResponseError as e:
-        logger.error(f"Error retrieving user with ID {user_id}: {e}")
-        return None
 
 def get_patients_page(page_size=10, page=1):
     logger.info(f"Fetching page {page} of patients, page size: {page_size}")

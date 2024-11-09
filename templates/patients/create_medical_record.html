@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Create Medical Record{% endblock %}
+
+{% block content %}
+    <h1 class="text-3xl font-bold mb-8 text-center text-blue-600">Create Medical Record</h1>
+
+    {% if error_message %}
+        <p class="text-red-500">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post" class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+        {% csrf_token %}
+
+        <!-- Select Record Type -->
+        <label class="block text-gray-700 font-bold mb-2">Select Record Type:</label>
+        <select id="recordType" name="record_type" class="w-full p-2 border border-gray-300 rounded mb-4" onchange="toggleFields()">
+            <option value="">Select a type</option>
+            <option value="PhysicalExam">Physical Exam</option>
+            <option value="BloodPressure">Blood Pressure</option>
+            <option value="BloodWork">Blood Work</option>
+            <option value="DiseaseHistory">Disease History</option>
+        </select>
+
+        <!-- Physical Exam Fields -->
+        <div id="PhysicalExamFields" class="hidden">
+            <label>Work Type:</label><input type="text" name="work_type" class="w-full p-2 border rounded mb-2">
+            <label>Residency Type:</label><input type="text" name="residency_type" class="w-full p-2 border rounded mb-2">
+            <label>Height (cm):</label><input type="number" name="height" class="w-full p-2 border rounded mb-2">
+            <label>Weight (kg):</label><input type="number" name="weight" class="w-full p-2 border rounded mb-2">
+            <label>Smoking Status:</label><input type="text" name="smoking_status" class="w-full p-2 border rounded mb-4">
+        </div>
+
+        <!-- Blood Pressure Fields -->
+        <div id="BloodPressureFields" class="hidden">
+            <label>Systolic Pressure (mmHg):</label><input type="number" name="systolic_pressure" class="w-full p-2 border rounded mb-2">
+            <label>Diastolic Pressure (mmHg):</label><input type="number" name="diastolic_pressure" class="w-full p-2 border rounded mb-4">
+        </div>
+
+        <!-- Blood Work Fields -->
+        <div id="BloodWorkFields" class="hidden">
+            <label>Glucose Level (mg/dL):</label><input type="number" name="glucose_level" class="w-full p-2 border rounded mb-4">
+        </div>
+
+        <!-- Disease History Fields -->
+        <div id="DiseaseHistoryFields" class="hidden">
+            <label>Disease Type:</label><input type="text" name="disease_type" class="w-full p-2 border rounded mb-4">
+        </div>
+
+        <!-- Notes Field -->
+        <div>
+            <label class="block text-gray-700 font-bold mb-2">Notes:</label>
+            <textarea name="notes" rows="4" class="w-full p-2 border border-gray-300 rounded mb-4" placeholder="Enter any additional notes here..."></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Create Record</button>
+    </form>
+
+    <script>
+        function toggleFields() {
+            // Hide all type-specific fields initially
+            document.getElementById('PhysicalExamFields').classList.add('hidden');
+            document.getElementById('BloodPressureFields').classList.add('hidden');
+            document.getElementById('BloodWorkFields').classList.add('hidden');
+            document.getElementById('DiseaseHistoryFields').classList.add('hidden');
+
+            // Show the fields based on selected type
+            const selectedType = document.getElementById('recordType').value;
+            if (selectedType) {
+                document.getElementById(selectedType + 'Fields').classList.remove('hidden');
+            }
+        }
+    </script>
+{% endblock %}
