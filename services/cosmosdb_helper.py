@@ -104,7 +104,9 @@ def create_user_and_patient(name, email, password, date_of_birth, sex, ever_marr
         "id": user_id,
         "name": name,
         "email": email,
-        "password_hash": password_hash  
+        "password_hash": password_hash,
+        "roles": ["Patient"],
+        "validator_id": ""
     }
     
     try:
@@ -121,7 +123,7 @@ def create_user_and_patient(name, email, password, date_of_birth, sex, ever_marr
         "date_of_birth": date_of_birth,
         "sex": sex,
         "ever_married": bool(ever_married),
-        "user_id": user_id  
+        "user_id": user_id,
     }
     
     try:
