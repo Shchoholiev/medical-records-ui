@@ -1,0 +1,98 @@
+{% load datetime_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-8 text-center text-blue-600">Patient Details</h1>
+        
+        <!-- Patient Information -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Patient Information</h2>
+            <p><strong>ID:</strong> {{ patient.id }}</p>
+            <p><strong>Name:</strong> {{ patient.name }}</p>
+            <p><strong>Date of Birth:</strong> {{ patient.date_of_birth|date:"Y-m-d" }}</p>
+            <p><strong>Gender:</strong> {{ patient.sex }}</p>
+        </div>
+
+        <!-- User Information -->
+        {% if user %}
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">User Information</h2>
+            <p><strong>ID:</strong> {{ user.id }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+        </div>
+        {% else %}
+        <p class="text-gray-500">No user details available for this patient.</p>
+        {% endif %}
+
+        <!-- Medical Records as Cards -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Medical Records</h2>
+            {% if medical_records %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for record in medical_records %}
+                    <div class="p-4 rounded-lg shadow-lg
+                                {% if record.type == 'PhysicalExam' %}bg-yellow-100 border-l-4 border-yellow-500{% endif %}
+                                {% if record.type == 'BloodWork' %}bg-blue-100 border-l-4 border-blue-500{% endif %}
+                                {% if record.type == 'BloodPressure' %}bg-green-100 border-l-4 border-green-500{% endif %}
+                                {% if record.type == 'DiseaseHistory' %}bg-red-100 border-l-4 border-red-500{% endif %}">
+                        
+                        <h3 class="text-xl font-bold mb-2">{{ record.display_name }}</h3>
+                        <p class="text-gray-700 mb-1"><strong>Date:</strong> {{ record.created_date_utc|iso_to_local }}</p>
+                        <p class="text-gray-700">{{ record.note }}</p>
+                        
+                        <!-- Display additional fields based on record type -->
+                        {% if record.type == 'PhysicalExam' %}
+                            <p><strong>Work Type:</strong> {{ record.work_type }}</p>
+                            <p><strong>Residency Type:</strong> {{ record.residency_type }}</p>
+                            <p><strong>Height:</strong> {{ record.height }} cm</p>
+                            <p><strong>Weight:</strong> {{ record.weight }} kg</p>
+                            <p><strong>Smoking Status:</strong> {{ record.smoking_status }}</p>
+                        {% elif record.type == 'BloodPressure' %}
+                            <p><strong>Systolic Pressure:</strong> {{ record.systolic_pressure }} mmHg</p>
+                            <p><strong>Diastolic Pressure:</strong> {{ record.diastolic_pressure }} mmHg</p>
+                        {% elif record.type == 'BloodWork' %}
+                            <p><strong>Glucose Level:</strong> {{ record.glucose_level }} mg/dL</p>
+                        {% elif record.type == 'DiseaseHistory' %}
+                            <p><strong>Disease Type:</strong> {{ record.disease_type }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No medical records found.</p>
+            {% endif %}
+        </div>
+
+        <!-- Health Notifications -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Health Notifications</h2>
+            {% if health_notifications %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for notification in health_notifications %}
+                    <div class="p-6 bg-white rounded-lg shadow-lg border-l-4
+                                {% if notification.disease %}border-red-500{% else %}border-green-500{% endif %}">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-lg font-bold">{{ notification.title }}</h3>
+                        </div>
+                        <p class="text-gray-700 mb-1">{{ notification.text }}</p>
+                        
+                        <!-- Display disease if present -->
+                        {% if notification.disease %}
+                            <p class="text-red-500 font-semibold mt-2"><strong>Disease:</strong> {{ notification.disease }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No health notifications found.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

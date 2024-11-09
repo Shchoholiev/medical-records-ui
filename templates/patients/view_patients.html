@@ -17,6 +17,7 @@
                         <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Name</th>
                         <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Date of Birth</th>
                         <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Sex</th>
+                        <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,6 +27,9 @@
                         <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.name }}</td>
                         <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.date_of_birth }}</td>
                         <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.sex }}</td>
+                        <td class="py-4 px-6 text-sm text-gray-700 border-b">
+                            <a href="{% url 'patient_user_details' patient.id %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Details</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
