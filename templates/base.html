@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Medical Records System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-blue-200 text-blue-800 shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold">Medical Records System</h1>
+            <nav class="flex space-x-4">
+                <a href="{% url 'view_patients' %}" class="hover:underline">Patients</a>
+                <a href="#" class="hover:underline">Reports</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper with Flex-Grow -->
+    <main class="container mx-auto p-8 flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-200 text-gray-700 mt-10">
+        <div class="container mx-auto px-4 py-4 text-center">
+            <p>&copy; 2024 Medical Records System. All rights reserved.</p>
+            <p>Developed by Serhii Shchoholiev, Pavlenko Polina</p>
+        </div>
+    </footer>
+
+</body>
+</html>

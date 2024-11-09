@@ -1,59 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Patients List</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-8">
-        <h1 class="text-3xl font-bold mb-8 text-center text-blue-600">Patients List</h1>
-        
-        <div class="overflow-x-auto shadow-md rounded-lg">
-            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Patient ID</th>
-                        <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Name</th>
-                        <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Date of Birth</th>
-                        <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Sex</th>
-                        <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for patient in patients %}
-                    <tr class="bg-white hover:bg-gray-100">
-                        <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.id }}</td>
-                        <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.name }}</td>
-                        <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.date_of_birth }}</td>
-                        <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.sex }}</td>
-                        <td class="py-4 px-6 text-sm text-gray-700 border-b">
-                            <a href="{% url 'patient_user_details' patient.id %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Details</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% extends "base.html" %}
 
-        <!-- Pagination Controls -->
-        <div class="mt-4 text-center">
-            <div class="inline-flex items-center space-x-2">
-                {% if page > 1 %}
-                    <a href="?page={{ page|add:-1 }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Previous</a>
-                {% else %}
-                    <span class="bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg shadow">Previous</span>
-                {% endif %}
-                
-                <span class="text-gray-700 font-semibold px-4">Page {{ page }}</span>
-                
-                {% if has_more %}
-                    <a href="?page={{ page|add:1 }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Next</a>
-                {% else %}
-                    <span class="bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg shadow">Next</span>
-                {% endif %}
-            </div>
+{% block title %}Patients List{% endblock %}
+
+{% block content %}
+    <h1 class="text-3xl font-bold mb-8 text-center text-blue-600">Patients List</h1>
+
+    <div class="overflow-x-auto shadow-md rounded-lg">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Patient ID</th>
+                    <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Name</th>
+                    <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Date of Birth</th>
+                    <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Sex</th>
+                    <th class="py-3 px-6 text-left text-sm font-semibold text-gray-600 border-b">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr class="bg-white hover:bg-gray-100">
+                    <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.id }}</td>
+                    <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.name }}</td>
+                    <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.date_of_birth|date:"Y-m-d" }}</td>
+                    <td class="py-4 px-6 text-sm text-gray-700 border-b">{{ patient.sex }}</td>
+                    <td class="py-4 px-6 text-sm text-gray-700 border-b">
+                        <a href="{% url 'patient_user_details' patient.id %}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="mt-4 text-center">
+        <div class="inline-flex items-center space-x-2">
+            {% if page > 1 %}
+                <a href="?page={{ page|add:-1 }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Previous</a>
+            {% else %}
+                <span class="bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg shadow">Previous</span>
+            {% endif %}
+            
+            <span class="text-gray-700 font-semibold px-4">Page {{ page }}</span>
+            
+            {% if has_more %}
+                <a href="?page={{ page|add:1 }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Next</a>
+            {% else %}
+                <span class="bg-gray-300 text-gray-500 font-semibold py-2 px-4 rounded-lg shadow">Next</span>
+            {% endif %}
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
