@@ -4,8 +4,12 @@ import logging
 from django.shortcuts import redirect, render
 from patients.decorators import login_required, role_required
 from services.blockchain import create_medical_record
-from services.cosmosdb_helper import create_user_and_patient, get_patient_details, get_patient_id_by_user_id, get_patients_page, update_patient_data, verify_user 
+from services.cosmosdb_helper import create_user_and_patient, get_age_risk_data, get_patient_details, get_patient_id_by_user_id, get_patients_page, update_patient_data, verify_user 
 from django.contrib import messages
+import matplotlib.pyplot as plt
+import io
+import base64
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +133,8 @@ def add_patient_view(request):
 
     return render(request, 'patients/add_patient.html')
 
+@login_required
+@role_required(['Doctor'])
 def update_patient_view(request, patient_id):
     patient, user, _, _ = get_patient_details(patient_id)
 
@@ -189,3 +195,67 @@ def logout_view(request):
 
 def access_denied_view(request):
     return render(request, 'patients/access_denied.html')
+
+@login_required
+@role_required(['Doctor'])
+def age_risk_distribution_view(request):
+    # Step 1: Retrieve age and risk data from CosmosDB
+    data = get_age_risk_data()
+    
+    # Step 2: Organize data into age groups and count stroke risk
+    age_groups = {
+        "0-18": 0,
+        "19-30": 0,
+        "31-40": 0,
+        "41-50": 0,
+        "51-60": 0,
+        "61+": 0
+    }
+    risk_counts = defaultdict(int)
+
+    for entry in data:
+        age = entry["age"]
+        at_risk = entry["at_risk_for_stroke"]
+        
+        if age is not None:
+            if age <= 18:
+                group = "0-18"
+            elif age <= 30:
+                group = "19-30"
+            elif age <= 40:
+                group = "31-40"
+            elif age <= 50:
+                group = "41-50"
+            elif age <= 60:
+                group = "51-60"
+            else:
+                group = "61+"
+            
+            age_groups[group] += 1
+            if at_risk:
+                risk_counts[group] += 1
+
+    # Step 3: Prepare data for charting
+    labels = list(age_groups.keys())
+    total_counts = [age_groups[group] for group in labels]
+    risk_counts_values = [risk_counts[group] for group in labels]
+    
+    # Step 4: Generate the chart
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(labels, total_counts, label="Total Patients", color='skyblue')
+    ax.bar(labels, risk_counts_values, label="At Risk for Stroke", color='salmon')
+
+    ax.set_xlabel("Age Group")
+    ax.set_ylabel("Number of Patients")
+    ax.set_title("Age-Based Disease Risk Distribution")
+    ax.legend()
+
+    # Step 5: Save plot to a PNG image in memory, then encode to base64
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+    buffer.close()
+
+    # Step 6: Pass the chart to the template
+    return render(request, 'patients/age_risk_distribution.html', {"chart": image_base64})

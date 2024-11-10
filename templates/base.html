@@ -16,7 +16,7 @@
                 {% if 'Doctor' in request.session.user_roles %}
                     <a href="{% url 'add_patient' %}" class="hover:underline">Add Patient</a>
                     <a href="{% url 'view_patients' %}" class="hover:underline">Patients</a>
-                    <a href="#" class="hover:underline">Reports</a>
+                    <a href="{% url 'age_risk_distribution' %}" class="hover:underline">Reports</a>
                 {% endif %}
             </nav>
             

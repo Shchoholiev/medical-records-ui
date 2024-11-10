@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Age-Based Disease Risk Distribution{% endblock %}
+
+{% block content %}
+    <h1 class="text-3xl font-bold mb-8 text-center text-blue-600">Age-Based Disease Risk Distribution</h1>
+    
+    <!-- Display the chart as an image -->
+    <div class="flex justify-center">
+        <img src="data:image/png;base64,{{ chart }}" alt="Age-Based Disease Risk Distribution Chart">
+    </div>
+{% endblock %}

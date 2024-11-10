@@ -11,4 +11,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('access_denied/', views.access_denied_view, name='access_denied'),
     path('patients/<str:patient_id>/update/', views.update_patient_view, name='update_patient'),
+    path('age-risk-distribution/', views.age_risk_distribution_view, name='age_risk_distribution'),
 ]

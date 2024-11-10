@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import logging
 import uuid
@@ -199,3 +200,47 @@ def update_patient_data(patient_id, patient_data, user_data):
     except Exception as e:
         logger.error(f"Error updating patient {patient_id} and user {user_id}: {e}")
         return False
+
+def get_age_risk_data():
+    """
+    Retrieve patient data and their risk of stroke for analysis.
+
+    :return: A list of dictionaries containing patient id, age, and stroke risk status.
+    """
+    try:
+        result = []
+        
+        patients_query = "SELECT c.id, c.date_of_birth, c.user_id FROM c"
+        patients = list(patients_container.query_items(
+            query=patients_query, enable_cross_partition_query=True
+        ))
+        
+        for patient in patients:
+            dob = patient.get("date_of_birth")
+            if dob:
+                birth_date = datetime.fromisoformat(dob).date()
+                age = (datetime.now().date() - birth_date).days // 365
+            else:
+                age = None  
+            
+            stroke_notification_query = """
+                SELECT * FROM c WHERE c.patient_id = @user_id AND c.disease = 'Stroke'
+            """
+            params = [{"name": "@user_id", "value": patient["user_id"]}]
+            notifications = list(health_notifications_container.query_items(
+                query=stroke_notification_query, parameters=params, enable_cross_partition_query=True
+            ))
+            
+            at_risk_for_stroke = bool(notifications)
+            
+            result.append({
+                "patient_id": patient["id"],
+                "age": age,
+                "at_risk_for_stroke": at_risk_for_stroke
+            })
+        
+        return result
+    
+    except Exception as e:
+        logger.error(f"Error retrieving age and risk data: {e}")
+        return []
