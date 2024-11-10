@@ -31,8 +31,10 @@ SECRET_KEY = "django-insecure-fqgr)*hv4yl@(p12)z=54pt)f=qj)xqm@$ut+xa96@q%31_s^p
 # DEBUG = True
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = ['medical-records-ui.azurewebsites.net']
+CSRF_TRUSTED_ORIGINS = [
+    'https://medical-records-ui.azurewebsites.net',
+]
 
 # Application definition
 
