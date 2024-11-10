@@ -22,3 +22,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('patients/', include('patients.urls')),
 ]
+
+handler404 = 'patients.views.custom_page_not_found_view'

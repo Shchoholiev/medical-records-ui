@@ -28,9 +28,10 @@ COSMOS_CONNECTION_STRING = os.getenv("COSMOS_CONNECTION_STRING")
 SECRET_KEY = "django-insecure-fqgr)*hv4yl@(p12)z=54pt)f=qj)xqm@$ut+xa96@q%31_s^p"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

@@ -259,3 +259,6 @@ def age_risk_distribution_view(request):
 
     # Step 6: Pass the chart to the template
     return render(request, 'patients/age_risk_distribution.html', {"chart": image_base64})
+
+def custom_page_not_found_view(request, exception):
+    return redirect('login')
