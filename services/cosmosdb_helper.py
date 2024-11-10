@@ -185,3 +185,17 @@ def get_patient_id_by_user_id(user_id):
         logger.error(f"Error retrieving patient ID for user ID {user_id}: {e}")
     
     return None
+
+def update_patient_data(patient_id, patient_data, user_data):
+    try:
+        user_id = patient_data["user_id"]
+        users_container.replace_item(item=user_id, body=user_data)
+        logger.info(f"User {user_id} updated successfully.")
+
+        patients_container.replace_item(item=patient_id, body=patient_data)
+        logger.info(f"Patient {patient_id} updated successfully.")
+
+        return True
+    except Exception as e:
+        logger.error(f"Error updating patient {patient_id} and user {user_id}: {e}")
+        return False

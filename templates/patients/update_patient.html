@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Update Patient{% endblock %}
+
+{% block content %}
+    <h1 class="text-3xl font-bold mb-8 text-center text-blue-600">Update Patient</h1>
+
+    {% if error_message %}
+        <p class="text-red-500">{{ error_message }}</p>
+    {% endif %}
+
+    <form method="post" class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+        {% csrf_token %}
+
+        <label>Name:</label>
+        <input type="text" name="name" value="{{ patient.name }}" class="w-full p-2 border rounded mb-4" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ user.email }}" class="w-full p-2 border rounded mb-4" required>
+
+        <label>Date of Birth:</label>
+        <input type="date" name="date_of_birth" value="{{ patient.date_of_birth }}" class="w-full p-2 border rounded mb-4" required>
+
+        <label>Sex:</label>
+        <select name="sex" class="w-full p-2 border rounded mb-4" required>
+            <option value="Male" {% if patient.sex == "Male" %}selected{% endif %}>Male</option>
+            <option value="Female" {% if patient.sex == "Female" %}selected{% endif %}>Female</option>
+        </select>
+
+        <div>
+            <label>Ever Married:</label>
+            <input type="checkbox" name="ever_married" class="mb-4" {% if patient.ever_married %}checked{% endif %}>
+        </div>
+
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Update Patient</button>
+    </form>
+{% endblock %}

@@ -4,7 +4,7 @@ import logging
 from django.shortcuts import redirect, render
 from patients.decorators import login_required, role_required
 from services.blockchain import create_medical_record
-from services.cosmosdb_helper import create_user_and_patient, get_patient_details, get_patient_id_by_user_id, get_patients_page, verify_user 
+from services.cosmosdb_helper import create_user_and_patient, get_patient_details, get_patient_id_by_user_id, get_patients_page, update_patient_data, verify_user 
 from django.contrib import messages
 
 logger = logging.getLogger(__name__)
@@ -128,6 +128,37 @@ def add_patient_view(request):
             return render(request, 'patients/add_patient.html', {'error_message': "Failed to add patient. Please try again."})
 
     return render(request, 'patients/add_patient.html')
+
+def update_patient_view(request, patient_id):
+    patient, user, _, _ = get_patient_details(patient_id)
+
+    if not patient or not user:
+        messages.error(request, "Patient not found.")
+        return redirect('view_patients')
+    
+    if patient.get("date_of_birth"):
+        patient["date_of_birth"] = datetime.datetime.fromisoformat(patient["date_of_birth"]).strftime("%Y-%m-%d")
+
+    if request.method == "POST":
+        patient["name"] = request.POST.get("name", patient["name"])
+        patient["date_of_birth"] = request.POST.get("date_of_birth", patient["date_of_birth"])
+        patient["sex"] = request.POST.get("sex", patient["sex"])
+        patient["ever_married"] = "ever_married" in request.POST
+
+        user["name"] = request.POST.get("name", user["name"])
+        user["email"] = request.POST.get("email", user["email"])
+
+        if update_patient_data(patient_id, patient, user):
+            messages.success(request, "Patient updated successfully.")
+            return redirect('patient_user_details', patient_id=patient_id)
+        else:
+            messages.error(request, "Failed to update patient. Please try again.")
+
+    context = {
+        "patient": patient,
+        "user": user
+    }
+    return render(request, "patients/update_patient.html", context)
 
 def login_view(request):
     if request.method == "POST":

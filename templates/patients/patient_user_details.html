@@ -13,7 +13,14 @@
         <p><strong>Name:</strong> {{ patient.name }}</p>
         <p><strong>Date of Birth:</strong> {{ patient.date_of_birth|date:"Y-m-d" }}</p>
         <p><strong>Gender:</strong> {{ patient.sex }}</p>
-        <p><strong>Ever Married?:</strong> {{ patient.ever_married }}</p>
+        <p><strong>Ever Married?:</strong> {{ patient.ever_married|yesno:"Yes,No" }}</p>
+
+        <!-- Update Patient Button (Only for Doctors) -->
+        {% if 'Doctor' in request.session.user_roles %}
+            <a href="{% url 'update_patient' patient.id %}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded inline-block mt-4">
+                Update Patient
+            </a>
+        {% endif %}
     </div>
 
     <!-- User Information -->
@@ -50,7 +57,9 @@
                     
                     <h3 class="text-xl font-bold mb-2">{{ record.display_name }}</h3>
                     <p class="text-gray-700 mb-1"><strong>Date:</strong> {{ record.created_date_utc|iso_to_local }}</p>
-                    <p class="text-gray-700">{{ record.note }}</p>
+                    {% if record.note %}
+                        <p class="text-gray-700">{{ record.note }}</p>
+                    {% endif %}
                     
                     <!-- Display additional fields based on record type -->
                     {% if record.type == 'PhysicalExam' %}
